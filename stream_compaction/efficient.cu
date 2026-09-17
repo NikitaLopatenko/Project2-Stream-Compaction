@@ -12,6 +12,8 @@ namespace StreamCompaction {
             return timer;
         }
 
+        // Part 5: thread i is dense 0..nActive-1 (nActive = n/(2d)).
+        // Host launches only that many threads so idle work does not fill whole blocks.
         __global__ void kernUpSweep(int n, int d, int *data) {
             int i = blockIdx.x * blockDim.x + threadIdx.x;
             int offset = 2 * d;
@@ -47,7 +49,7 @@ namespace StreamCompaction {
                 nPow2 *= 2;
             }
 
-            const int blockSize = 256;
+            const int blockSize = 128;
             int *dev = nullptr;
 
             cudaMalloc(&dev, nPow2 * sizeof(int));
@@ -96,7 +98,7 @@ namespace StreamCompaction {
                 return 0;
             }
 
-            const int blockSize = 256;
+            const int blockSize = 128;
             int blocks = (n + blockSize - 1)/ blockSize;
 
             int nPow2 = 1;
